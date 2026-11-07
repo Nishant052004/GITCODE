@@ -1,0 +1,62 @@
+{
+  "queries": [
+    {
+      "id": "q1",
+      "query": "How do we verify a user's password?",
+      "relevant": [
+        { "file": "src/acme/auth.py", "symbol": "verify_password" }
+      ]
+    },
+    {
+      "id": "q2",
+      "query": "What happens when a charge is declined by the payment gateway?",
+      "relevant": [
+        { "file": "src/acme/payments.py", "symbol": "charge_invoice" },
+        { "file": "src/acme/payments.py", "symbol": "PaymentError" }
+      ]
+    },
+    {
+      "id": "q3",
+      "query": "How is the product search index built from documents?",
+      "relevant": [
+        { "file": "src/acme/search.py", "symbol": "build_index" }
+      ]
+    },
+    {
+      "id": "q4",
+      "query": "Where does the frontend client retry failed HTTP requests with backoff?",
+      "relevant": [
+        { "file": "frontend/api/client.js", "symbol": "request" }
+      ]
+    },
+    {
+      "id": "q5",
+      "query": "How do I get a logger that writes JSON lines?",
+      "relevant": [
+        { "file": "src/acme/utils/logger.py", "symbol": "get_logger" }
+      ]
+    },
+    {
+      "id": "q6",
+      "query": "Traceback (most recent call last): File \"src/acme/auth.py\", line 52, in login UserNotFoundError: ghost@example.com",
+      "relevant": [
+        { "file": "src/acme/auth.py", "symbol": "login" },
+        { "file": "src/acme/auth.py", "symbol": "UserNotFoundError" }
+      ]
+    },
+    {
+      "id": "q7",
+      "query": "Where are sqlite database connections opened and the schema applied?",
+      "relevant": [
+        { "file": "src/acme/storage.py", "symbol": "connect_db" }
+      ]
+    },
+    {
+      "id": "q8",
+      "query": "How do the tests check that wrong passwords are rejected?",
+      "relevant": [
+        { "file": "tests/test_auth.py", "symbol": "test_verify_rejects_wrong_password" }
+      ]
+    }
+  ]
+}

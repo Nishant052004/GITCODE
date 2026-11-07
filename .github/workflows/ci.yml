@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main, my-new-branch]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Lint (ruff)
+        run: |
+          ruff check backend cli eval tests
+          ruff format --check backend cli eval tests
+
+      - name: Unit + integration + e2e tests
+        run: pytest -q
+
+      - name: Smoke test - ingest demo repo and ask a question
+        run: |
+          python -m cli.main ingest examples/demo_repo
+          python -m cli.main query "How do we verify a user's password?" --k 3
+
+      - name: Retrieval evaluation
+        run: python eval/run_retrieval_eval.py --repo examples/demo_repo
+
+      - name: Upload eval artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results
+          path: eval/results/
+          if-no-files-found: ignore

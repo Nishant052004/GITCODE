@@ -1,0 +1,11 @@
+# Pull in the project runtime dependencies as well.
+-r requirements.txt
+
+# Dev / CI deps
+pytest>=8.0
+ruff>=0.4
+
+# Optional heavy extras - install manually if you want them:
+#   pip install sentence-transformers   # local neural embeddings + cross-encoder reranker
+#   pip install qdrant-client           # Qdrant vector store backend (local path mode)
+# python -m cli.main serve --host 127.0.0.1 --port 8000

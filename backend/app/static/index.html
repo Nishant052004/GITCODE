@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cosmos">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Codebase Copilot &bull; Intelligent Code Search & Answers</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css?v=3" />
+</head>
+<body>
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <button id="sidebar-toggle" class="btn-icon" title="Toggle Navigation Sidebar" aria-label="Toggle Sidebar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      </button>
+      <div class="brand">
+        <div class="brand-orb">
+          <span class="orb-inner"></span>
+        </div>
+        <div class="brand-text">
+          <h1>Codebase<span class="brand-accent">Copilot</span></h1>
+          <span class="version-tag">PRO v0.2.0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-center">
+      <div id="status-pill" class="status-pill connecting" title="Backend Status">
+        <span class="status-dot"></span>
+        <span id="status-text">Connecting to backend&hellip;</span>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <button id="btn-open-ingest" class="btn btn-secondary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Ingest Repo</span>
+      </button>
+
+      <button id="btn-reindex" class="btn btn-ghost" title="Reindex Changed Files">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="reindex-icon"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        <span class="hide-mobile">Reindex</span>
+      </button>
+
+      <div class="theme-menu-wrap">
+        <button id="btn-theme" class="btn-icon" title="Switch Theme Palette" aria-label="Switch Theme">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </button>
+      </div>
+
+      <button id="btn-clear-chat" class="btn-icon" title="Clear Conversation" aria-label="Clear Chat">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- App Layout -->
+  <div class="app-body">
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-section">
+        <div class="section-title">
+          <span>Active Repositories</span>
+          <span id="repo-count-badge" class="badge">0</span>
+        </div>
+        <div id="sidebar-repo-list" class="repo-card-list">
+          <div class="empty-hint">No repositories loaded</div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-title">
+          <span>Prompt Ideas</span>
+          <span class="badge">Click to ask</span>
+        </div>
+        <div id="sidebar-suggestions" class="suggestions-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div class="sidebar-section files-section">
+        <div class="section-title">
+          <span>Indexed Files</span>
+          <span id="file-count-badge" class="badge">0</span>
+        </div>
+        <div class="file-search-wrap">
+          <input type="text" id="file-search-input" placeholder="Search file paths&hellip;" autocomplete="off" />
+        </div>
+        <div id="sidebar-file-list" class="file-list">
+          <div class="empty-hint">Loading file tree&hellip;</div>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="pipeline-spec">
+          <div class="spec-row"><span class="spec-label">Embedder</span><span id="spec-embedder" class="spec-val">-</span></div>
+          <div class="spec-row"><span class="spec-label">Vector DB</span><span id="spec-vector" class="spec-val">-</span></div>
+          <div class="spec-row"><span class="spec-label">Reranker</span><span id="spec-reranker" class="spec-val">-</span></div>
+          <div class="spec-row"><span class="spec-label">Answerer</span><span id="spec-answerer" class="spec-val">-</span></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Chat & Main Workspace -->
+    <main class="chat-workspace">
+      <div id="chat-stream" class="chat-stream" aria-live="polite">
+        <!-- Welcome Hero -->
+        <div class="welcome-card" id="welcome-card">
+          <div class="welcome-badge">
+            <span class="welcome-spark">✦</span> Hybrid Lexical &bull; Vector &bull; Cross-Encoder
+          </div>
+          <h2>Explore & Ask Anything About Your Codebase</h2>
+          <p class="welcome-desc">
+            Codebase Copilot ingests repositories, chunks AST syntax trees, creates dual embeddings &amp; BM25 indices, and generates verifiable answers citing exact files, line numbers, commits, and authors.
+          </p>
+
+          <div class="quick-cards-grid">
+            <div class="quick-card" data-query="How do we verify a user's password?">
+              <div class="quick-card-icon">🔐</div>
+              <div class="quick-card-body">
+                <strong>Password Verification</strong>
+                <span>Inspect authentication hashes &amp; verification logic</span>
+              </div>
+            </div>
+            <div class="quick-card" data-query="Where and how are invoices charged?">
+              <div class="quick-card-icon">💳</div>
+              <div class="quick-card-body">
+                <strong>Payment Pipeline</strong>
+                <span>Trace billing, stripe charges &amp; invoice handlers</span>
+              </div>
+            </div>
+            <div class="quick-card" data-query="Show the database storage implementation and interface">
+              <div class="quick-card-icon">💾</div>
+              <div class="quick-card-body">
+                <strong>Data Storage Layer</strong>
+                <span>Locate persistence schema and CRUD operations</span>
+              </div>
+            </div>
+            <div class="quick-card" data-query="Why does login fail for unknown or inactive users?">
+              <div class="quick-card-icon">⚠️</div>
+              <div class="quick-card-body">
+                <strong>Auth Error Handling</strong>
+                <span>Check exception types and token issuance</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Dock -->
+      <div class="input-dock-wrap">
+        <form id="ask-form" class="input-dock" autocomplete="off">
+          <div class="input-controls-top">
+            <div class="k-selector" title="Number of code chunks to retrieve">
+              <span class="k-label">Top K:</span>
+              <button type="button" class="k-btn active" data-k="3">3</button>
+              <button type="button" class="k-btn" data-k="5">5</button>
+              <button type="button" class="k-btn" data-k="8">8</button>
+            </div>
+            <div class="dock-hints hide-mobile">
+              <span>Press <kbd>Enter</kbd> to ask</span>
+              <span><kbd>Shift+Enter</kbd> newline</span>
+            </div>
+          </div>
+
+          <div class="input-row">
+            <textarea id="ask-input" rows="1" placeholder="Ask a question about the code, paste an error trace, or name a module&hellip;" autofocus></textarea>
+            <button type="submit" id="ask-btn" class="btn btn-primary btn-submit">
+              <span class="btn-text">Ask</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <!-- Code Chunk Modal -->
+  <div id="modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-chip" id="modal-kind">chunk</span>
+          <h2 id="modal-title" class="modal-filename">src/acme/auth.py:38-49</h2>
+        </div>
+        <div class="modal-actions">
+          <button id="modal-copy-btn" class="btn-icon" title="Copy code snippet">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+          <button id="modal-close" class="btn-icon modal-close-btn" aria-label="Close modal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-meta-bar" id="modal-meta">
+        <!-- Injected dynamically -->
+      </div>
+
+      <div class="modal-code-wrapper">
+        <pre><code id="modal-code" class="code-content"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ingest Modal -->
+  <div id="ingest-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-window ingest-modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-chip accent">Ingestion</span>
+          <h2>Ingest Repository</h2>
+        </div>
+        <button id="ingest-modal-close" class="btn-icon modal-close-btn" aria-label="Close modal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form id="ingest-form" class="ingest-form">
+        <p class="modal-desc">
+          Enter a local filesystem path (e.g., <code>examples/demo_repo</code>) or a GitHub repository URL (e.g. <code>https://github.com/owner/repo</code>).
+        </p>
+
+        <div class="form-group">
+          <label for="ingest-repo-input">Repository Source</label>
+          <input type="text" id="ingest-repo-input" placeholder="e.g. examples/demo_repo or owner/repo" required value="examples/demo_repo" />
+        </div>
+
+        <div class="form-group">
+          <label for="ingest-branch-input">Branch (Optional)</label>
+          <input type="text" id="ingest-branch-input" placeholder="main (default: HEAD)" />
+        </div>
+
+        <div class="form-row-checkbox">
+          <label class="checkbox-container">
+            <input type="checkbox" id="ingest-full-input" checked />
+            <span class="checkbox-label">Full Re-index (uncheck to skip files with identical checksums)</span>
+          </label>
+        </div>
+
+        <div id="ingest-status-box" class="ingest-status-box hidden">
+          <div class="spinner-small"></div>
+          <span id="ingest-status-msg">Ingesting repository&hellip;</span>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="ingest-cancel-btn" class="btn btn-ghost">Cancel</button>
+          <button type="submit" id="ingest-submit-btn" class="btn btn-primary">
+            <span>Start Ingestion</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container" aria-live="assertive"></div>
+
+  <script src="/static/app.js?v=3"></script>
+</body>
+</html>
